@@ -1,4 +1,8 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { addUserToGroup } from "./add-user-to-group/resource"
+import { createUser } from "./create-user/resource"
+import { deleteUser } from "./delete-user/resource"
+import { postConfirmation } from "../auth/post-confirmation/resource";
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -10,21 +14,67 @@ const schema = a.schema({
   Todo: a
     .model({
       content: a.string(),
+    //})
+    //.authorization((allow) => [allow.publicApiKey()]),
+  }).authorization(allow => [allow.owner()]),
+
+  addUserToGroup: a
+  .mutation()
+  .arguments({
+    userId: a.string().required(),
+    groupName: a.string().required(),
+  })
+  .authorization((allow) => [allow.group("ADMINS")])
+  .handler(a.handler.function(addUserToGroup))
+  .returns(a.json()),
+
+  //  テスト
+  createUser: a
+  .mutation()
+  .arguments({
+    email: a.string().required(),
+  })
+  .authorization((allow) => [allow.group("ADMINS")])
+  .handler(a.handler.function(createUser))
+  .returns(a.json()),
+
+    //  テスト
+    deleteUser: a
+    .mutation()
+    .arguments({
+      email: a.string().required(),
     })
-    .authorization((allow) => [allow.publicApiKey()]),
-});
+    .authorization((allow) => [allow.group("ADMINS")])
+    .handler(a.handler.function(deleteUser))
+    .returns(a.json()),
+//-----------------
+
+  UserProfile: a
+  .model({
+    email: a.string(),
+    profileOwner: a.string(),
+  })
+  .authorization((allow) => [
+    allow.ownerDefinedIn("profileOwner"),
+  ]),
+})
+.authorization((allow) => [allow.resource(postConfirmation)]);
+
+
 
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "apiKey",
+    defaultAuthorizationMode: 'userPool',
+    //defaultAuthorizationMode: "apiKey",
     // API Key is used for a.allow.public() rules
-    apiKeyAuthorizationMode: {
-      expiresInDays: 30,
-    },
+    //apiKeyAuthorizationMode: {
+    //  expiresInDays: 30,
+    //},
   },
+
 });
 
 /*== STEP 2 ===============================================================
