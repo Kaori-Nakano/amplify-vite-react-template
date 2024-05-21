@@ -27,7 +27,7 @@ const initialState = { Emailaddr:''};
 
 function App() {
 //export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  //const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
   const [formState, setFormState] = useState(initialState);
   
 
@@ -52,7 +52,7 @@ function App() {
 
       const restOperation = get({ 
         apiName: 'myRestApi',
-        path: 'items' ,
+        path: 'cognito-auth-path' ,
         options: {
           headers: {
             //'Content-Type' : 'application/json',
@@ -121,12 +121,12 @@ function App() {
       <h1>{user?.signInDetails?.loginId}'s todos</h1>
       <h1>My todos</h1>
       <button onClick={createTodo}>+ new</button>
-      <ul>
+      {/* <ul>
         {todos.map((todo) => (          
           <li onClick={()=>deleteTodo(todo.id)}
           key={todo.id}>{todo.content}</li>
         ))}
-      </ul>
+      </ul> */}
       <div>
         🥳 App successfully hosted. Try creating a new todo.
         <br />
