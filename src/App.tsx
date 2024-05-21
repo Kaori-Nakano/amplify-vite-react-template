@@ -5,6 +5,7 @@ import { Authenticator } from '@aws-amplify/ui-react'
 import '@aws-amplify/ui-react/styles.css'
 import outputs from "../amplify_outputs.json";
 import { Amplify } from 'aws-amplify';
+import { get } from 'aws-amplify/api';
 import { getCurrentUser } from 'aws-amplify/auth';
 //import { Auth } from 'aws-amplify';
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
@@ -33,10 +34,11 @@ function App() {
   const [formState, setFormState] = useState(initialState);
 
   useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
+    // client.models.Todo.observeQuery().subscribe({
+    //   next: (data) => setTodos([...data.items]),
+    // });
     //mute();
+    getItem();
   }, []);
 
   
@@ -44,6 +46,18 @@ function App() {
     setFormState({ ...formState, [key]: value });
   }
 
+  async function getItem() {
+    try {
+      const restOperation = get({ 
+        apiName: 'myRestApi',
+        path: 'items' 
+      });
+      const response = await restOperation.response;
+      console.log('GET call succeeded: ', response);
+    } catch (error) {
+      console.log('GET call failed: ', error);
+    }
+  }
 
   function createTodo() {
     client.models.Todo.create({ content: window.prompt("Todo content") });
