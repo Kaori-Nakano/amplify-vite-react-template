@@ -6,9 +6,7 @@ import '@aws-amplify/ui-react/styles.css'
 import outputs from "../amplify_outputs.json";
 import { Amplify } from 'aws-amplify';
 import { get } from 'aws-amplify/api';
-import { getCurrentUser } from 'aws-amplify/auth';
-//import { Auth } from 'aws-amplify';
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { fetchAuthSession } from 'aws-amplify/auth'
 
 Amplify.configure(outputs);
 const client = generateClient<Schema>();
@@ -19,7 +17,6 @@ const client = generateClient<Schema>();
 // console.log("sign-in details", signInDetails);
 
 const initialState = { Emailaddr:''};
-
 // export async function signOut() {
 //   try {
 //     await Auth.signOut();
@@ -32,6 +29,7 @@ function App() {
 //export default function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
   const [formState, setFormState] = useState(initialState);
+  
 
   useEffect(() => {
     // client.models.Todo.observeQuery().subscribe({
@@ -48,9 +46,20 @@ function App() {
 
   async function getItem() {
     try {
+
+      const authSession = (await fetchAuthSession()).tokens;
+      console.log(`${authSession?.accessToken.toString()}`)
+
       const restOperation = get({ 
         apiName: 'myRestApi',
-        path: 'items' 
+        path: 'items' ,
+        options: {
+          headers: {
+            //'Content-Type' : 'application/json',
+            //Authorization: `${authSession1?.accessToken.toString()}`
+            Authorization: `${authSession?.accessToken.toString()}`
+          }
+      }
       });
       const response = await restOperation.response;
       console.log('GET call succeeded: ', response);
@@ -67,17 +76,17 @@ function App() {
     client.models.Todo.delete({id})
   }
 
-  async function mute(){
-    try {
-      const res=await client.mutations.addUserToGroup({
-        groupName: "ADMINS",
-        userId: "8861a380-6011-7094-9c0c-f306c7f39eb6",
-      });
-      console.log('mute call succeeded',res);
-    } catch (e) {
-      console.log('mute call failed: ', e);
-    }
-  }
+  // async function mute(){
+  //   try {
+  //     const res=await client.mutations.addUserToGroup({
+  //       groupName: "ADMINS",
+  //       userId: "8861a380-6011-7094-9c0c-f306c7f39eb6",
+  //     });
+  //     console.log('mute call succeeded',res);
+  //   } catch (e) {
+  //     console.log('mute call failed: ', e);
+  //   }
+  // }
 
   async function createUser(){
     try {
